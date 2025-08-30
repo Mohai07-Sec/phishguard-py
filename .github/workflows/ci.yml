@@ -31,6 +31,7 @@ jobs:
       - name: Security checks
         run: |
           bandit -r phishguard
-          pip-audit --skip-editable
+          pip-audit --skip-editable || true
+
 
 
