@@ -192,6 +192,65 @@ def main() -> None:
     else:
         parser.print_help()
 
+import argparse
+from phishguard.commands.csv_to_json import handle_csv_to_json
+from phishguard.commands.json_pretty import handle_json_pretty
+from phishguard.commands.regex_grep import handle_regex_grep
+from phishguard.commands.http_get import handle_http_get
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(prog="ops-toolkit")
+    subparsers = parser.add_subparsers(dest="command")
+
+    # === define subcommands ===
+    csv_parser = subparsers.add_parser("csv-to-json", help="Convert CSV to JSON")
+    csv_parser.add_argument("file", help="Path to input CSV file")
+
+    json_parser = subparsers.add_parser("json-pretty", help="Pretty-print JSON file")
+    json_parser.add_argument("file", help="Path to JSON file")
+
+    regex_parser = subparsers.add_parser("regex-grep", help="Search file(s) with regex")
+    regex_parser.add_argument("pattern", help="Regex pattern")
+    regex_parser.add_argument("files", nargs="+", help="Files to search")
+
+    http_parser = subparsers.add_parser("http-get", help="Fetch URL and save to file")
+    http_parser.add_argument("url", help="Target URL")
+    http_parser.add_argument("outfile", help="Output file path")
+    http_parser.add_argument("--retries", type=int, default=3, help="Retry count")
+    http_parser.add_argument("--timeout", type=int, default=5, help="Request timeout")
+
+    # === parse args ===
+    args = parser.parse_args(argv)
+
+    # === dispatch to handlers ===
+    if args.command == "csv-to-json":
+        return handle_csv_to_json(args)
+    elif args.command == "json-pretty":
+        return handle_json_pretty(args)
+    elif args.command == "regex-grep":
+        return handle_regex_grep(args)
+    elif args.command == "http-get":
+        return handle_http_get(args)
+
+
+from phishguard.cli import main
+def test_csv_to_json_empty(tmp_path):
+    csv_file = tmp_path / "empty.csv"
+    csv_file.write_text("")
+    result = main(["csv-to-json", str(csv_file)])
+    assert result == "[]"
+
+from phishguard.cli import main
+import json
+
+def test_csv_to_json_success(tmp_path):
+    csv_file = tmp_path / "data.csv"
+    csv_file.write_text("name,age\nAlice,30\nBob,25\n")
+
+    result = main(["csv-to-json", str(csv_file)])   # ✅ only one argument
+    data = json.loads(result)
+    assert data[0]["name"] == "Alice"
+    assert data[1]["age"] == "25"
 
 
 

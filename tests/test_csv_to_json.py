@@ -25,3 +25,10 @@ def test_csv_to_json(tmp_path):
     assert isinstance(data, list)
     assert data[0]["name"] == "MoHay"
     assert data[1]["age"] == "30"
+
+def test_csv_to_json_empty(tmp_path):
+    csv_file = tmp_path / "empty.csv"
+    csv_file.write_text("")
+    from phishguard.cli import main
+    result = main(["csv-to-json", str(csv_file)])
+    assert result == "[]"  # or however your command prints JSON

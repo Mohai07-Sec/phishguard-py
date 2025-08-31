@@ -1,0 +1,27 @@
+import re
+import logging
+
+def handle_regex_grep(args):
+    pattern = args.pattern
+    regex = None
+    try:
+        regex = re.compile(pattern)
+    except re.error as e:
+        logging.error(f"Invalid regex: {e}")
+        return []
+
+    matches = []
+    for file_path in args.files:
+        try:
+            with open(file_path, "r") as f:
+                for line in f:
+                    if regex.search(line):
+                        matches.append(line.strip())
+        except FileNotFoundError:
+            logging.error(f"File not found: {file_path}")
+        except Exception as e:
+            logging.error(f"Error reading {file_path}: {e}")
+
+    if not matches:
+        logging.info("No matches found")
+    return matches

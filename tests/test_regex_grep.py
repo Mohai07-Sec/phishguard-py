@@ -23,3 +23,11 @@ def test_regex_grep_no_matches(capsys, tmp_path):
     captured = capsys.readouterr()
 
     assert captured.out.strip() == ""  # no output expected
+
+def test_regex_grep_no_match(tmp_path, caplog):
+    log_file = tmp_path / "test.log"
+    log_file.write_text("no keywords here")
+    from phishguard.cli import main
+    with caplog.at_level("INFO"):
+        main(["regex-grep", "error", str(log_file)])
+    assert "No matches" in caplog.text
