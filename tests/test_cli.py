@@ -150,3 +150,23 @@ def test_regex_grep_no_match(tmp_path):
     file.write_text("hello world\n")
     result = main(["regex-grep", "error", str(file)])
     assert result == []
+
+from phishguard.cli import main
+import json
+
+from phishguard.cli import main
+def test_csv_to_json_empty(tmp_path):
+    csv_file = tmp_path / "empty.csv"
+    csv_file.write_text("")
+    result = main(["csv-to-json", str(csv_file)])
+    assert result == "[]"
+
+
+def test_csv_to_json_success(tmp_path):
+    csv_file = tmp_path / "data.csv"
+    csv_file.write_text("name,age\nAlice,30\nBob,25\n")
+
+    result = main(["csv-to-json", str(csv_file)])   # ✅ only one argument
+    data = json.loads(result)
+    assert data[0]["name"] == "Alice"
+    assert data[1]["age"] == "25"
